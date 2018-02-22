@@ -10,18 +10,18 @@ import pubg.radar.struct.Archetype.*
 import pubg.radar.struct.NetGUIDCache.Companion.guidCache
 import java.util.concurrent.ConcurrentHashMap
 
-class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYPE_ACTOR, client) {
-  companion object: GameListener {
+class ActorChannel(ChIndex: Int, client: Boolean = true) : Channel(ChIndex, CHTYPE_ACTOR, client) {
+  companion object : GameListener {
     init {
       register(this)
     }
-    
+
     val actors = ConcurrentHashMap<NetworkGUID, Actor>()
     val visualActors = ConcurrentHashMap<NetworkGUID, Actor>()
     val airDropLocation = ConcurrentHashMap<NetworkGUID, Vector3>()
     val droppedItemLocation = ConcurrentHashMap<NetworkGUID, Triple<Vector3, HashSet<String>, Color>>()
     val corpseLocation = ConcurrentHashMap<NetworkGUID, Vector3>()
-    
+
     override fun onGameOver() {
       actors.clear()
       visualActors.clear()
@@ -30,9 +30,9 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
       corpseLocation.clear()
     }
   }
-  
+
   var actor: Actor? = null
-  
+
   override fun ReceivedBunch(bunch: Bunch) {
     if (client && bunch.bHasMustBeMappedGUIDs) {
       val NumMustBeMappedGUIDs = bunch.readUInt16()
@@ -42,7 +42,7 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
     }
     ProcessBunch(bunch)
   }
-  
+
   fun ProcessBunch(bunch: Bunch) {
     if (actor == null) {
       if (!bunch.bOpen) {
@@ -52,7 +52,7 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
       if (actor == null)
         return
     }
-    
+
     val actor = actor!!
     while (bunch.notEnd()) {
       //header
@@ -66,15 +66,19 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
         }
         if (client) {
           val bStablyNamed = bunch.readBit()
-          if (bStablyNamed) {// If this is a stably named sub-object, we shouldn't need to create it
+          if (bStablyNamed) { // If this is a stably named sub-object, we shouldn't need to create it
             if (subobj == null)
               continue
           } else {
             val (classGUID, classObj) = bunch.readObject()//SubOjbectClass,SubObjectClassNetGUID
             if (classObj != null && actor.Type == DroopedItemGroup) {
+              // Output item names to console. Good for finding item names.
+              // println(classObj.pathName)
               val sn = Item.isGood(classObj.pathName)
               if (sn != null)
                 droppedItemLocation[actor.netGUID]!!.second.add(sn)
+              //println(droppedItemLocation[actor.netGUID])
+
             }
             bugln { "subObjClass:${actor.netGUID} ${actor.archetype.pathName} classObj:$classObj" }
             if (!classGUID.isValid() || classObj == null)
@@ -94,21 +98,20 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
       }
       try {
         val outPayload = bunch.deepCopy(NumPayloadBits)
-        
+
         info { ",${if (bHasRepLayout) "hasRepLayout" else "noRepLayout"},actor[${actor.netGUID.value}]archetype=${actor.archetype}" }
         if (bHasRepLayout) {
           if (!client)// Server shouldn't receive properties.
             return
           repl_layout_bunch(outPayload, actor)
         }
-        
       } catch (e: Exception) {
       }
       bunch.skipBits(NumPayloadBits)
     }
     infoln { "" }
   }
-  
+
   fun SerializeActor(bunch: Bunch) {
     val (netGUID, newActor) = bunch.readObject()//NetGUID
     if (netGUID.isDynamic()) {
@@ -117,24 +120,22 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
         val existingCacheObjectPtr = guidCache.objectLoop[archetypeNetGUID]
         if (existingCacheObjectPtr != null)
           bugln { "Unresolved Archetype GUID. Path: ${existingCacheObjectPtr.pathName}, NetGUID: $archetypeNetGUID" }
-        else
-          bugln { "Unresolved Archetype GUID. Guid not registered!, NetGUID: $archetypeNetGUID" }
+        else bugln { "Unresolved Archetype GUID. Guid not registered!, NetGUID: $archetypeNetGUID" }
       }
       val bSerializeLocation = bunch.readBit()
-      
+
       val Location = if (bSerializeLocation)
         bunch.readVector()
-      else
-        Vector3.Zero
+      else Vector3.Zero
       val bSerializeRotation = bunch.readBit()
       val Rotation = if (bSerializeRotation) bunch.readRotationShort() else Vector3.Zero
-      
+
       val bSerializeScale = bunch.readBit()
       val Scale = if (bSerializeScale) bunch.readVector() else Vector3.Zero
-      
+
       val bSerializeVelocity = bunch.readBit()
       val Velocity = if (bSerializeVelocity) bunch.readVector() else Vector3.Zero
-      
+
       if (actor == null && archetype != null) {
         val _actor = Actor(netGUID, archetypeNetGUID, archetype, chIndex)
         with(_actor) {
@@ -150,13 +151,16 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
                 droppedItemLocation[netGUID] = Triple(location, HashSet(), Color(0f, 0f, 0f, 0f))
               }
               AirDrop -> airDropLocation[netGUID] = location
-              DeathDropItemPackage-> corpseLocation[netGUID]=location
+              DeathDropItemPackage -> corpseLocation[netGUID] = location
+
               else -> {
               }
             }
           }
         }
         bugln { "spawn $actor" }
+        //println(corpseLocation)
+        //println(droppedItemLocation)
       }
       bugln { ",[$netGUID] spawn:$Location,$Rotation,$Velocity, actor:$actor" }
     } else {
@@ -164,9 +168,8 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
       actor = Actor(netGUID, newActor.outerGUID, newActor, chIndex)
       actor!!.isStatic = true
     }
-    
   }
-  
+
   override fun close() {
     if (actor != null) {
       if (client) {
@@ -176,6 +179,4 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
       actor = null
     }
   }
-  
 }
-

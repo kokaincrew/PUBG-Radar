@@ -6,17 +6,17 @@ import pubg.radar.struct.cmd.CMD.propertyString
 import pubg.radar.struct.cmd.CMD.propertyVector100
 import java.util.concurrent.ConcurrentHashMap
 
-object TeamCMD: GameListener {
+object TeamCMD : GameListener {
   val team = ConcurrentHashMap<String, String>()
-  
+
   init {
     register(this)
   }
-  
+
   override fun onGameOver() {
     team.clear()
   }
-  
+
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
       //      println("${actor.netGUID} $waitingHandle")

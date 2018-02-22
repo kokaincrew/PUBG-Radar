@@ -19,8 +19,8 @@ class Bunch(
     var bPartialFinal: Boolean,
     val bHasPackageMapExports: Boolean,
     var bHasMustBeMappedGUIDs: Boolean
-): Buffer(buffer) {
-  
+) : Buffer(buffer) {
+
   override fun deepCopy(copyBits: Int): Bunch {
     val buf = super.deepCopy(copyBits)
     return Bunch(
@@ -42,6 +42,6 @@ class Bunch(
         bHasMustBeMappedGUIDs
     )
   }
-  
+
   var next: Bunch? = null
 }

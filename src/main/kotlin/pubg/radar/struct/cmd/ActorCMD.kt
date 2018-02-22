@@ -16,33 +16,33 @@ import pubg.radar.struct.cmd.CMD.propertyVector100
 import pubg.radar.struct.cmd.CMD.repMovement
 import java.util.concurrent.ConcurrentHashMap
 
-object ActorCMD: GameListener {
+object ActorCMD : GameListener {
   init {
     register(this)
   }
-  
+
   override fun onGameOver() {
     actorWithPlayerState.clear()
     playerStateToActor.clear()
   }
-  
+
   val actorWithPlayerState = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
   val playerStateToActor = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
-  
+
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
       when (waitingHandle) {
-        1 -> if (readBit()) {//bHidden
+        1 -> if (readBit()) { //bHidden
           visualActors.remove(actor.netGUID)
           bugln { ",bHidden id$actor" }
         }
-        2 -> if (!readBit()) {// bReplicateMovement
+        2 -> if (!readBit()) { // bReplicateMovement
           if (!actor.isVehicle) {
             visualActors.remove(actor.netGUID)
           }
           bugln { ",!bReplicateMovement id$actor " }
         }
-        3 -> if (readBit()) {//bTearOff
+        3 -> if (readBit()) { //bTearOff
           visualActors.remove(actor.netGUID)
           bugln { ",bTearOff id$actor" }
         }

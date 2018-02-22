@@ -12,11 +12,11 @@ import pubg.radar.struct.cmd.CMD.propertyObject
 import pubg.radar.struct.cmd.CMD.propertyString
 import pubg.radar.struct.cmd.CMD.propertyVector
 
-object GameStateCMD: GameListener {
+object GameStateCMD : GameListener {
   init {
     register(this)
   }
-  
+
   override fun onGameOver() {
     SafetyZonePosition.setZero()
     SafetyZoneRadius = 0f
@@ -36,7 +36,7 @@ object GameStateCMD: GameListener {
     RemainingTime = 0
     MatchElapsedMinutes = 0
   }
-  
+
   var TotalWarningDuration = 0f
   var ElapsedWarningDuration = 0f
   var RemainingTime = 0
@@ -54,7 +54,7 @@ object GameStateCMD: GameListener {
   var NumJoinPlayers = 0
   var NumAlivePlayers = 0
   var NumAliveTeams = 0
-  
+
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
       when (waitingHandle) {
@@ -144,7 +144,7 @@ object GameStateCMD: GameListener {
         40 -> {
           val pos = propertyVector()
           RedZonePosition.set(pos.x, pos.y)
-          
+
           val b = RedZonePosition
         }
         41 -> {

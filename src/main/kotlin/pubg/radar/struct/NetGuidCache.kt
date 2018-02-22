@@ -17,24 +17,24 @@ class NetGuidCacheObject(
 }
 
 class NetGUIDCache {
-  companion object: GameListener {
+  companion object : GameListener {
     init {
       register(this)
     }
-    
+
     val guidCache = NetGUIDCache()
-    
+
     override fun onGameOver() {
       guidCache.isExportingNetGUIDBunch = false
       guidCache.objectLoop.clear()
     }
   }
-  
+
   val objectLoop = HashMap<NetworkGUID, NetGuidCacheObject>()
   var isExportingNetGUIDBunch = false
-  
+
   fun get(index: Int) = objectLoop[NetworkGUID(index)]
-  
+
   fun getObjectFromNetGUID(netGUID: NetworkGUID): NetGuidCacheObject? {
     val cacheObject = objectLoop[netGUID] ?: return null
     if (cacheObject.pathName.isBlank()) {
@@ -43,7 +43,7 @@ class NetGUIDCache {
     }
     return cacheObject
   }
-  
+
   fun registerNetGUIDFromPath_Client(
       netGUID: NetworkGUID,
       pathName: String,
@@ -52,7 +52,7 @@ class NetGUIDCache {
       bNoLoad: Boolean,
       bIgnoreWhenMissing: Boolean) {
     val existingCacheObjectPtr = objectLoop[netGUID]
-    
+
     // If we find this guid, make sure nothing changes
     if (existingCacheObjectPtr != null) {
       bugln { "already register path!! original=$existingCacheObjectPtr --------------> new=$netGUID $pathName" }
@@ -63,22 +63,22 @@ class NetGUIDCache {
         bPathnameMismatch = true
       if (existingCacheObjectPtr.outerGUID != outerGUID)
         bOuterMismatch = true
-      
+
       if (bPathnameMismatch || bOuterMismatch)
         bugln { ",bPathnameMismatch:$bPathnameMismatch,bOuterMismatch:$bOuterMismatch" }
       return
     }
-    
+
     // Register a new guid with this path
     val cacheObject = NetGuidCacheObject(
         pathName, outerGUID, networkChecksum, bNoLoad, bIgnoreWhenMissing)
     objectLoop[netGUID] = cacheObject
     debugln { "register path [$netGUID] $cacheObject" }
   }
-  
+
   fun registerNetGUID_Client(netGUID: NetworkGUID, obj: Any) {
     val existingCacheObjectPtr = objectLoop[netGUID]
-    
+
     // If we find this guid, make sure nothing changes
     if (existingCacheObjectPtr != null) {
       bugln { "already register clien!! original=${actors[existingCacheObjectPtr.outerGUID]} --------------> new=$netGUID obj $obj" }

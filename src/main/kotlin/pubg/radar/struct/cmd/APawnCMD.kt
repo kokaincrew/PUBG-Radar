@@ -12,15 +12,15 @@ object APawnCMD {
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
       when (waitingHandle) {
-        1 -> if (readBit()) {//bHidden
+        1 -> if (readBit()) { //bHidden
           ActorChannel.visualActors.remove(actor.netGUID)
           bugln { ",bHidden id$actor" }
         }
-        2 -> if (!readBit()) {// bReplicateMovement
+        2 -> if (!readBit()) { // bReplicateMovement
           ActorChannel.visualActors.remove(actor.netGUID)
           bugln { ",!bReplicateMovement id$actor " }
         }
-        3 -> if (readBit()) {//bTearOff
+        3 -> if (readBit()) { //bTearOff
           ActorChannel.visualActors.remove(actor.netGUID)
           bugln { ",bTearOff id$actor" }
         }

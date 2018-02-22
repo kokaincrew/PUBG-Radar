@@ -6,11 +6,11 @@ import pubg.radar.struct.Bunch
 import pubg.radar.struct.NetGUIDCache.Companion.guidCache
 
 abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = true) {
-  companion object: GameListener {
+  companion object : GameListener {
     init {
       register(this)
     }
-    
+
     override fun onGameOver() {
       inChannels.clear()
       outChannels.clear()
@@ -19,7 +19,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
       globalInReliable = -1
       globalOutReliable = -1
     }
-    
+
     val inChannels = hashMapOf<Int, Channel>()
     val outChannels = HashMap<Int, Channel>()
     val closedInChannels = hashSetOf<Int>()
@@ -31,7 +31,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
           field = value
       }
   }
-  
+
   var bDormant = false
   var Closing = false
   var InReliable: Int = if (client) globalInReliable else globalOutReliable
@@ -39,7 +39,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
   var inQueueLast: Bunch? = null
   var numInRec = 0
   var inPartialBunch: Bunch? = null// Partial bunch we are receiving (incoming partial bunches are appended to this)
-  
+
   fun ReceiveNetGUIDBunch(bunch: Bunch) {
     val bHasRepLayoutExport = bunch.readBit()
     if (bHasRepLayoutExport) {
@@ -48,18 +48,17 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
     guidCache.isExportingNetGUIDBunch = true
     val NumGUIDsInBunch = bunch.readInt32()
     val MAX_GUID_COUNT = 2048
-    
+
     if (NumGUIDsInBunch > MAX_GUID_COUNT) {
       guidCache.isExportingNetGUIDBunch = false
       throw Exception("NumGUIDsInBunch:$NumGUIDsInBunch > MAX_GUID_COUNT:$MAX_GUID_COUNT")
     }
     for (i in 0 until NumGUIDsInBunch)
       bunch.readObject()
-    
+
     guidCache.isExportingNetGUIDBunch = false
-    
   }
-  
+
   fun ReceivedRawBunch(bunch: Bunch) {
     if (bunch.bHasPackageMapExports)
       ReceiveNetGUIDBunch(bunch)
@@ -97,7 +96,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
           pre.next = bunch
         }
       }
-      
+
       numInRec++
       if (numInRec >= RELIABLE_BUFFER)
         throw Exception("UChannel::ReceivedRawBunch: Too many reliable messages queued up")
@@ -115,7 +114,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
       }
     }
   }
-  
+
   fun ReceivedNextBunch(bunch: Bunch): Boolean {
     /*
     * We received the next bunch. Basically at this point:
@@ -123,10 +122,10 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
     * -We don't know if this is partial or not
     * If it's not a partial bunch, or it completes a partial bunch, we can call ReceivedSequencedBunch to actually handle it
     */
-    
+
     if (bunch.bReliable)
       InReliable = bunch.ChSequence// Reliables should be ordered properly at this point
-    
+
     var HandleBunch: Bunch? = bunch
     if (bunch.bPartial) {
       HandleBunch = null
@@ -141,7 +140,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
           }
           this.inPartialBunch = null
         }
-        
+
         this.inPartialBunch = bunch
         if (!bunch.bHasPackageMapExports && bunch.bitsLeft() > 0) {
           check(bunch.bitsLeft() % 8 == 0)
@@ -159,26 +158,26 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
         val inPartialBunch = inPartialBunch
         if (inPartialBunch != null) {
           val bReliableSequencesMatches = bunch.ChSequence == inPartialBunch.ChSequence + 1
-          val bUnreliableSequenceMatches = bReliableSequencesMatches || bunch.ChSequence == inPartialBunch.ChSequence;
+          val bUnreliableSequenceMatches = bReliableSequencesMatches || bunch.ChSequence == inPartialBunch.ChSequence
           val bSequenceMatches = if (inPartialBunch.bReliable) bReliableSequencesMatches else bUnreliableSequenceMatches
-          
+
           if (!inPartialBunch.bPartialFinal && bSequenceMatches && inPartialBunch.bReliable == bunch.bReliable) {
             // Merge.
             if (!bunch.bHasPackageMapExports && bunch.notEnd()) {
               inPartialBunch.append(bunch)
             }
-            
+
             // Only the final partial bunch should ever be non byte aligned. This is enforced during partial bunch creation
             // This is to ensure fast copies/appending of partial bunches. The final partial bunch may be non byte aligned.
             check(bunch.bHasPackageMapExports || bunch.bPartialFinal || bunch.bitsLeft() % 8 == 0)
-            
+
             // Advance the sequence of the current partial bunch so we know what to expect next
             inPartialBunch.ChSequence = bunch.ChSequence
-            
+
             if (bunch.bPartialFinal) {
               check(!bunch.bHasPackageMapExports) // Shouldn't have these, they only go in initial partial export bunches
               HandleBunch = inPartialBunch
-              
+
               inPartialBunch.bPartialFinal = true
               inPartialBunch.bClose = bunch.bClose
               inPartialBunch.bDormant = bunch.bDormant
@@ -191,37 +190,36 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
               info { "Unreliable partial trying to destroy reliable partial 2" }
               return false
             }
-            
+
             this.inPartialBunch = null
           }
         }
       }
-      
+
       val MAX_CONSTRUCTED_PARTIAL_SIZE_IN_BYTES = 1024 * 64
       if (inPartialBunch != null && inPartialBunch!!.numBytes() > MAX_CONSTRUCTED_PARTIAL_SIZE_IN_BYTES) {
         info { "Final partial bunch too large" }
         return false
       }
     }
-    
+
     if (HandleBunch != null) {
       // Remember the range.
       // In the case of a non partial, HandleBunch == radar.radar.struct.Bunch
       // In the case of a partial, HandleBunch should == InPartialBunch, and radar.radar.struct.Bunch should be the last bunch.
-      
+
       // Receive it in sequence.
       return ReceivedSequencedBunch(HandleBunch)
     }
     return false
   }
-  
+
   fun ReceivedSequencedBunch(bunch: Bunch): Boolean {
     if (!Closing || bunch.bOpen) {
       Closing = false
       try {
         ReceivedBunch(bunch)
       } catch (e: IndexOutOfBoundsException) {
-      
       } catch (e: Exception) {
         e.printStackTrace()
       }
@@ -239,8 +237,8 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
     }
     return false
   }
-  
+
   abstract fun ReceivedBunch(bunch: Bunch)
-  
+
   abstract fun close()
 }

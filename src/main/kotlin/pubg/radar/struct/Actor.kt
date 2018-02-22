@@ -12,7 +12,8 @@ enum class Archetype { //order matters, it affects the order of drawing
   TwoSeatBoat,
   SixSeatBoat,
   TwoSeatCar,
-  ThreeSeatCar,
+  ThreeSeatBike,
+  TwoSeatBike,
   FourSeatCar,
   SixSeatCar,
   Plane,
@@ -22,7 +23,7 @@ enum class Archetype { //order matters, it affects the order of drawing
   PlayerState,
   Team,
   DeathDropItemPackage;
-  
+
   companion object {
     fun fromArchetype(archetype: String) = when {
       archetype.contains("Default__TSLGameState") -> GameState
@@ -30,7 +31,10 @@ enum class Archetype { //order matters, it affects the order of drawing
       archetype.contains("DroppedItemGroup") -> DroopedItemGroup
       archetype.contains("Aircraft") -> Plane
       archetype.contains("Parachute") -> Parachute
-      archetype.contains(Regex("(bike|buggy|SideCar)", RegexOption.IGNORE_CASE)) -> TwoSeatCar
+      archetype.contains(Regex("(bike|SideCar)", RegexOption.IGNORE_CASE)) -> TwoSeatBike
+      archetype.contains("sidecar", true) -> ThreeSeatBike
+      //archetype.contains("bike", true) -> TwoSeatBike
+      archetype.contains("buggy", true) -> TwoSeatCar
       archetype.contains(Regex("(dacia|uaz|pickup)", RegexOption.IGNORE_CASE)) -> FourSeatCar
       archetype.contains("bus", true) -> SixSeatCar
       archetype.contains("van", true) -> SixSeatCar
@@ -48,26 +52,27 @@ enum class Archetype { //order matters, it affects the order of drawing
 
 class Actor(val netGUID: NetworkGUID, val archetypeGUID: NetworkGUID, val archetype: NetGuidCacheObject, val ChIndex: Int) {
   val Type: Archetype = fromArchetype(archetype.pathName)
-  
+
   var location = Vector3.Zero
   var rotation = Vector3.Zero
   var velocity = Vector3.Zero
-  
+
   var owner: NetworkGUID? = null
   var attachTo: NetworkGUID? = null
   var beAttached = false
   var isStatic = false
-  
+
   override fun toString(): String {
     val ow = if (owner != null) owner else ""
     return "Actor(netGUID=$netGUID,location=$location,archetypeGUID=$archetypeGUID, archetype=$archetype, ChIndex=$ChIndex, Type=$Type,  rotation=$rotation, velocity=$velocity,owner=$ow"
   }
-  
+
   val isAPawn = when (Type) {
     TwoSeatBoat,
     SixSeatBoat,
     TwoSeatCar,
-    ThreeSeatCar,
+    TwoSeatBike,
+    ThreeSeatBike,
     FourSeatCar,
     SixSeatCar,
     Plane,

@@ -13,26 +13,29 @@ import pubg.radar.struct.cmd.CMD.propertyObject
 import pubg.radar.struct.cmd.CMD.propertyString
 import java.util.concurrent.*
 
-object PlayerStateCMD: GameListener {
+object PlayerStateCMD : GameListener {
   init {
     register(this)
   }
-  
+
   override fun onGameOver() {
     playerNames.clear()
     playerNumKills.clear()
+    playerHealth.clear()
     uniqueIds.clear()
     teamNumbers.clear()
     attacks.clear()
+
   }
-  
+
   val playerNames = ConcurrentHashMap<NetworkGUID, String>()
   val playerNumKills = ConcurrentHashMap<NetworkGUID, Int>()
+  val playerHealth = ConcurrentHashMap<NetworkGUID, Int>()
   val uniqueIds = ConcurrentHashMap<String, NetworkGUID>()
   val teamNumbers = ConcurrentHashMap<NetworkGUID, Int>()
   val attacks = ConcurrentLinkedQueue<Pair<NetworkGUID, NetworkGUID>>()//A -> B
   var selfID = NetworkGUID(0)
-  
+
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
       when (waitingHandle) {
@@ -106,7 +109,7 @@ object PlayerStateCMD: GameListener {
           uniqueIds[uniqueId] = actor.netGUID
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} uniqueId=$uniqueId")
         }
-        27 -> {//indicate player's death
+        27 -> { //indicate player's death
           val Ranking = propertyInt()
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} Ranking=$Ranking")
         }
@@ -169,10 +172,10 @@ object PlayerStateCMD: GameListener {
           val HeadShots = propertyInt()
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} HeadShots=$HeadShots")
         }
-        42 -> {//ReplicatedEquipableItems
+        42 -> { //ReplicatedEquipableItems
           return false
         }
-        43 -> {//LastHitTime
+        43 -> { //LastHitTime
           val lastHitTime = propertyFloat()
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} lastHitTime=$lastHitTime")
         }
@@ -180,7 +183,6 @@ object PlayerStateCMD: GameListener {
           val currentAttackerPlayerNetId = propertyString()
           attacks.add(Pair(uniqueIds[currentAttackerPlayerNetId]!!, actor.netGUID))
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} currentAttackerPlayerNetId=$currentAttackerPlayerNetId")
-    
         }
         45 -> {
         }

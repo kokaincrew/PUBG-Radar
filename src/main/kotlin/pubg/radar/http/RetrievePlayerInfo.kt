@@ -14,30 +14,30 @@ data class PlayerInfo(
     val headshotKillRatio: Float)
 
 class PlayerProfile {
-  companion object: GameListener {
+  companion object : GameListener {
     init {
       register(this)
     }
-    
+
     override fun onGameStart() {
       running.set(true)
       scheduled.set(false)
     }
-    
+
     override fun onGameOver() {
       running.set(false)
       completedPlayerInfo.clear()
       pendingPlayerInfo.clear()
       baseCount.clear()
     }
-    
+
     val completedPlayerInfo = ConcurrentHashMap<String, PlayerInfo>()
     val pendingPlayerInfo = ConcurrentHashMap<String, Int>()
     private val baseCount = ConcurrentHashMap<String, Int>()
     val client = OkHttpClient()
     val scheduled = AtomicBoolean(false)
     val running = AtomicBoolean(true)
-    
+
     fun query(name: String) {
       if (completedPlayerInfo.containsKey(name)) return
       baseCount.putIfAbsent(name, 0)
@@ -72,21 +72,19 @@ class PlayerProfile {
           }
         }
     }
-    
+
     fun ee(c: Int, a: Int = base): String {
       val first = if (c < a) ""
-      else
-        ee(c / a, a)
-      
+      else ee(c / a, a)
+
       val c = c % a
       return first + if (c > 35)
         (c + 29).toChar()
-      else
-        c.toString(36)
+      else c.toString(36)
     }
-    
+
     val base = 62
-    
+
     fun parseData(p: String, k: List<String>): String {
       var c = k.size
       val d = HashMap<String, String>()
@@ -96,13 +94,13 @@ class PlayerProfile {
         d[it.value] ?: ""
       }
     }
-    
+
     val roundMostKillRegex = Regex("\"records_roundmostkills\":\\s*\"([0-9]+)\"")
     val winRegex = Regex("\"records_wins\":\\s*\"([0-9]+)\"")
     val totalPlayedRegex = Regex("\"records_roundsplayed\":\\s*\"([0-9]+)\"")
     val killDeathRatioRegex = Regex("\"records_killdeathratio\":\\s*\"([0-9.]+)\"")
     val headshotKillRatioRegex = Regex("\"records_headshotkillratio\":\\s*\"([0-9.]+)\"")
-    
+
     fun search(name: String): PlayerInfo? {
       val url = "http://pubg.ali213.net/pubg10/ajax?nickname=$name"
       val request = Request.Builder().url(url).build()
@@ -130,11 +128,9 @@ class PlayerProfile {
           } catch (e: Exception) {
 //            e.printStackTrace()
           }
-          
         }
       }
       return null
     }
-    
   }
 }
