@@ -111,6 +111,9 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   lateinit var iconImages: Map<String, Texture>
   lateinit var airdropimage: Texture
   lateinit var corpseboximage: Texture
+  lateinit var alive: Texture
+  lateinit var selficon: Texture
+  lateinit var teamsalive: Texture
 
   // lateinit var map: Texture
   lateinit var largeFont: BitmapFont
@@ -156,7 +159,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
     if (button == RIGHT) {
     pinLocation.set(pinLocation.set(screenX.toFloat(), screenY.toFloat()).windowToMap())
-        println(pinLocation)
+      camera.update()
+      println(pinLocation)
       return true
     } else if (button == LEFT) {
       dragging = true
@@ -205,6 +209,9 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     fontCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
     alarmSound = Gdx.audio.newSound(Gdx.files.internal("Alarm.wav"))
     corpseboximage = Texture(Gdx.files.internal("icons/box.png"))
+    alive = Texture(Gdx.files.internal("images/alive.png"))
+    teamsalive = Texture(Gdx.files.internal("images/teams.png"))
+    selficon = Texture(Gdx.files.internal("images/self.png"))
     airdropimage = Texture(Gdx.files.internal("icons/airdrop.png"))
     // mapErangel = Texture(Gdx.files.internal("Erangel.bmp"))
     // mapMiramar = Texture(Gdx.files.internal("Miramar.bmp"))
@@ -270,7 +277,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     val generator = FreeTypeFontGenerator(Gdx.files.internal("GOTHICB.TTF"))
     val param = FreeTypeFontParameter()
-    param.size = 50
+    param.size = 38
     param.characters = DEFAULT_CHARS
     param.color = WHITE
     largeFont = generator.generateFont(param)
@@ -302,6 +309,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     //move camera
     camera.position.set(selfX + screenOffsetX, selfY + screenOffsetY, 0f)
     camera.update()
+
 
     val cameraTileScale = Math.max(windowWidth, windowHeight) / camera.zoom
     var useScale = 0
@@ -353,9 +361,19 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       }
 
     paint(fontCamera.combined) {
-      largeFont.draw(spriteBatch, "$NumAlivePlayers/$NumAliveTeams\n" +
-                                  "${MatchElapsedMinutes}min\n" +
-                                  "${ElapsedWarningDuration.toInt()}/${TotalWarningDuration.toInt()}\n", 10f, windowHeight - 10f)
+      largeFont.draw(spriteBatch, "Time Elapsed: ${MatchElapsedMinutes}min \n" /* + "${ElapsedWarningDuration.toInt()} Next BlueZone: ${TotalWarningDuration.toInt()}"*/ ,10f, windowHeight - 10f)
+
+      spriteBatch.draw(alive, windowWidth - 150f , windowHeight - 100f)
+      largeFont.draw(spriteBatch, "$NumAlivePlayers" , windowWidth - 143f, windowHeight - 24f)
+
+      if (NumAliveTeams > 1) {
+
+        spriteBatch.draw(teamsalive, windowWidth - 280f , windowHeight - 100f)
+        largeFont.draw(spriteBatch, "$NumAliveTeams" , windowWidth - 273f, windowHeight - 24f)
+
+      }
+
+
       val time = (pinLocation.cpy().sub(selfX, selfY).len() / runSpeed).toInt()
       val (x, y) = pinLocation.mapToWindow()
       littleFont.draw(spriteBatch, "$time", x, windowHeight - y)
@@ -380,6 +398,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         "Bag2",
         "Grenade"
       )
+
       //Draw Airdrop Icon
       airDropLocation.values.forEach {
         val (x, y) = it
@@ -441,8 +460,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
       color = pinColor
       circle(pinLocation, pinRadius * zoom, 10)
+
+      //selfDir.angle)
+
       //draw self
       drawPlayer(LIME, tuple4(null, selfX, selfY, selfDir.angle()))
+
       drawItem()
       //drawItemNames()
       //drawCorpse()
@@ -810,7 +833,7 @@ largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
     }
     val profileText = "${completedPlayerInfo.size}/${completedPlayerInfo.size + pendingPlayerInfo.size}"
     layout.setText(largeFont, profileText)
-    largeFont.draw(spriteBatch, profileText, windowWidth - layout.width, windowHeight - 10f)
+   // largeFont.draw(spriteBatch, profileText, windowWidth - layout.width, windowHeight - 10f) // the right side text
   }
 
   var lastPlayTime = System.currentTimeMillis()
@@ -964,7 +987,9 @@ largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
     littleFont.dispose()
     airdropimage.dispose()
     corpseboximage.dispose()
-
+    alive.dispose()
+    teamsalive.dispose()
+    selficon.dispose()
     // mapErangel.dispose()
     // mapMiramar.dispose()
     for ((key, image) in iconImages) {

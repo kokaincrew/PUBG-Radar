@@ -35,6 +35,7 @@ object GameStateCMD : GameListener {
     NumAliveTeams = 0
     RemainingTime = 0
     MatchElapsedMinutes = 0
+    IsTeamMatch = 0
   }
 
   var TotalWarningDuration = 0f
@@ -54,6 +55,7 @@ object GameStateCMD : GameListener {
   var NumJoinPlayers = 0
   var NumAlivePlayers = 0
   var NumAliveTeams = 0
+  var IsTeamMatch = 0
 
   fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
     with(bunch) {
@@ -169,7 +171,7 @@ object GameStateCMD : GameListener {
           val bIsGasRelease = propertyBool()
         }
         47 -> {
-          val bIsTeamMatch = propertyBool()
+          val bIsTeamMatch = propertyInt()
           val b = bIsTeamMatch
         }
         48 -> {
@@ -183,7 +185,7 @@ object GameStateCMD : GameListener {
           SafetyZoneBeginRadius = propertyFloat()
         }
         51 -> {
-          val MatchStartType = propertyByte()
+          var MatchStartType = propertyByte()
         }
         52 -> return false
         else -> return false

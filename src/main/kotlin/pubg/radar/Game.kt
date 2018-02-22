@@ -45,8 +45,8 @@ fun main(args: Array<String>) {
     System.exit(-1)
   }
 
-  //Sniffer.sniffLocationOnline()
-  Sniffer.sniffLocationOffline() //use offline mode
+  Sniffer.sniffLocationOnline()
+  //Sniffer.sniffLocationOffline() //use offline mode
 
   val ui = GLMap()
   ui.show()
