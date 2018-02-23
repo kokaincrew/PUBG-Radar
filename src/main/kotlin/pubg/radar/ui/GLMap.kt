@@ -85,6 +85,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   override fun onGameOver() {
     camera.zoom = 1 / 4f
+    itemCamera.zoom
 
     aimStartTime.clear()
     attackLineStartTime.clear()
@@ -121,12 +122,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   lateinit var nameFont: BitmapFont
   lateinit var itemFont: BitmapFont
   lateinit var fontCamera: OrthographicCamera
+  lateinit var itemCamera: OrthographicCamera
   lateinit var camera: OrthographicCamera
   lateinit var alarmSound: Sound
 
-  val tileZooms = listOf("256", "512", "1024", "2048", "4096", "8192")
-  val tileRowCounts = listOf(1, 2, 4, 8, 16, 32)
-  val tileSizes = listOf(819200f, 409600f, 204800f, 102400f, 51200f, 25600f)
+  val tileZooms = listOf("256", "512", "1024", "2048", "4096"/*, "8192"*/)
+  val tileRowCounts = listOf(1, 2, 4, 8, 16/*, 32*/)
+  val tileSizes = listOf(819200f, 409600f, 204800f, 102400f, 51200f/*, 25600f*/)
 
   val layout = GlyphLayout()
   var windowWidth = initialWindowWidth
@@ -152,6 +154,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   override fun scrolled(amount: Int): Boolean {
     camera.zoom *= 1.1f.pow(amount)
+    itemCamera.zoom *= 1.1f.pow(amount)
     return true
   }
 
@@ -207,6 +210,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
     fontCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
+    itemCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
     alarmSound = Gdx.audio.newSound(Gdx.files.internal("Alarm.wav"))
     corpseboximage = Texture(Gdx.files.internal("icons/box.png"))
     alive = Texture(Gdx.files.internal("images/alive.png"))
@@ -314,12 +318,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     val cameraTileScale = Math.max(windowWidth, windowHeight) / camera.zoom
     var useScale = 0
     when {
-        cameraTileScale > 4096 -> useScale = 5
-        cameraTileScale > 2048 -> useScale = 4
-        cameraTileScale > 1024 -> useScale = 3
-        cameraTileScale > 512 -> useScale = 2
-        cameraTileScale > 256 -> useScale = 1
-        else -> useScale = 0
+    // cameraTileScale > 4096 -> useScale = 5
+      cameraTileScale > 2048 -> useScale = 4
+      cameraTileScale > 1024 -> useScale = 3
+      cameraTileScale > 512 -> useScale = 2
+      cameraTileScale > 256 -> useScale = 1
+      else -> useScale = 0
     }
     val (tlX, tlY) = Vector2(0f, 0f).windowToMap()
     val (brX, brY) = Vector2(windowWidth, windowHeight).windowToMap()
@@ -335,11 +339,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         val y = if (i < 10) "0$i" else "$i"
         for (j in xMin..xMax) {
           val x = if (j < 10) "0$j" else "$j"
-          val tileStartX = (j-1)*tileSize
-          val tileStartY = (i-1)*tileSize
+          val tileStartX = (j - 1) * tileSize
+          val tileStartY = (i - 1) * tileSize
           draw(mapTiles[tileZoom]!![y]!![x], tileStartX, tileStartY, tileSize, tileSize,
-           0, 0, 256, 256,
-           false, true)
+                  0, 0, 256, 256,
+                  false, true)
         }
       }
     }
@@ -361,15 +365,15 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       }
 
     paint(fontCamera.combined) {
-      largeFont.draw(spriteBatch, "Time Elapsed: ${MatchElapsedMinutes}min \n" /* + "${ElapsedWarningDuration.toInt()} Next BlueZone: ${TotalWarningDuration.toInt()}"*/ ,10f, windowHeight - 10f)
+      largeFont.draw(spriteBatch, "Time Elapsed: ${MatchElapsedMinutes}min \n" /* + "${ElapsedWarningDuration.toInt()} Next BlueZone: ${TotalWarningDuration.toInt()}"*/, 10f, windowHeight - 10f)
 
-      spriteBatch.draw(alive, windowWidth - 150f , windowHeight - 100f)
-      largeFont.draw(spriteBatch, "$NumAlivePlayers" , windowWidth - 143f, windowHeight - 24f)
+      spriteBatch.draw(alive, windowWidth - 150f, windowHeight - 100f)
+      largeFont.draw(spriteBatch, "$NumAlivePlayers", windowWidth - 143f, windowHeight - 24f)
 
       if (NumAliveTeams > 1) {
 
-        spriteBatch.draw(teamsalive, windowWidth - 280f , windowHeight - 100f)
-        largeFont.draw(spriteBatch, "$NumAliveTeams" , windowWidth - 273f, windowHeight - 24f)
+        spriteBatch.draw(teamsalive, windowWidth - 280f, windowHeight - 100f)
+        largeFont.draw(spriteBatch, "$NumAliveTeams", windowWidth - 273f, windowHeight - 24f)
 
       }
 
@@ -379,26 +383,9 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       littleFont.draw(spriteBatch, "$time", x, windowHeight - y)
       safeZoneHint()
       drawPlayerInfos(typeLocation[Player]) //PlayerName etc
+    }
 
-      var itemNameDrawBlacklist = arrayListOf(
-        "AR.Stock",
-        "S.Loops",
-        "S.Comp",
-        "U.Supp",
-        "Choke",
-      //"V.Grip",
-        "A.Grip",
-        "762",
-      //"Ak",
-        "U.Ext",
-        "AR.Ext",
-        "2x",
-        "Vector",
-        "Win94",
-        "Bag2",
-        "Grenade"
-      )
-
+    paint(itemCamera.combined) {
       //Draw Airdrop Icon
       airDropLocation.values.forEach {
         val (x, y) = it
@@ -413,10 +400,14 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         val (x,y) = it
         val (sx,sy) = Vector2(x,y).mapToWindow()
         val syFix = windowHeight - sy
+        val iconScale = 2f / camera.zoom
 
         //println(sx + syFix)
-        spriteBatch.draw(corpseboximage, sx - 16, syFix - 16)
+        //spriteBatch.draw(corpseboximage, sx - 16, syFix - 16)
 
+        spriteBatch.draw(corpseboximage, sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
+        0, 0, 32, 32,
+        false, true)
       }
 
       //Draw Items
@@ -429,19 +420,38 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
           val (sx, sy) = Vector2(x+16, y-16).mapToWindow()
           val syFix = windowHeight - sy
 
-          //var yOffset = 2
-          //println(items) //print items in console
+          var itemNameDrawBlacklist = arrayListOf(
+                  "AR.Stock",
+                  "S.Loops",
+                  "S.Comp",
+                  "U.Supp",
+                  "Choke",
+                  //"V.Grip",
+                  "A.Grip",
+                  "762",
+                  //"Ak",
+                  "U.Ext",
+                  "AR.Ext",
+                  "2x",
+                  "Vector",
+                  "Win94",
+                  "Bag2",
+                  "Grenade"
+          )
+
           items.forEach {
           if (it !in itemNameDrawBlacklist) {
-          if ( it in iconImages && sx > 0 &&
-              sx < windowWidth && sy > 0 && sy < windowHeight ) {
-              draw(iconImages[it], sx, syFix)
-      //    draw(iconImages[it], sx, syFix)
-      //    itemFont.draw(spriteBatch,"$items" , sx, syFix)
-
-          } else {
-            itemFont.draw(spriteBatch, it, sx, syFix)
-              }
+            val iconScale = 2f / camera.zoom
+            if (it in iconImages &&
+                    iconScale > 8 &&
+                    sx > 0 && sx < windowWidth &&
+                    syFix > 0 && syFix < windowHeight) {
+              draw(iconImages[it], sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
+                      0, 0, 32, 32,
+                      false, true)
+            } else {
+              //itemFont.draw(spriteBatch, it, sx, syFix)
+          }
             }
           }
         }
@@ -450,7 +460,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     val zoom = camera.zoom
 
     Gdx.gl.glEnable(GL20.GL_BLEND)
-    //Redzone Color
+
+      //Redzone Color
     draw(Filled) {
       color = redZoneColor
       circle(RedZonePosition, RedZoneRadius, 100)
@@ -461,18 +472,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       color = pinColor
       circle(pinLocation, pinRadius * zoom, 10)
 
-      //selfDir.angle)
 
       //draw self
       drawPlayer(LIME, tuple4(null, selfX, selfY, selfDir.angle()))
-
       drawItem()
-      //drawItemNames()
-      //drawCorpse()
-      drawAirDrop(zoom)
-
-
+      //drawAirDrop(zoom)
       drawAPawn(typeLocation, selfX, selfY, zoom, currentTime)
+
     }
 
     drawAttackLine(currentTime)
@@ -619,18 +625,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
   }
 
-  private fun ShapeRenderer.drawCorpse() {
-    corpseLocation.values.forEach {
-
-      val (x, y) = it
-      val backgroundRadius = (corpseRadius + 50f)
-      val radius = corpseRadius
-      color = BLACK
-      rect(x - backgroundRadius, y - backgroundRadius, backgroundRadius * 2, backgroundRadius * 2)
-      color = corpseColor
-      rect(x - radius, y - radius, radius * 2, radius * 2)
-    }
-  }
 
   private fun ShapeRenderer.drawAirDrop(zoom: Float) {
     airDropLocation.values.forEach {
@@ -969,6 +963,7 @@ largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
     windowWidth = width.toFloat()
     windowHeight = height.toFloat()
     camera.setToOrtho(true, windowWidth * windowToMapUnit, windowHeight * windowToMapUnit)
+    itemCamera.setToOrtho(false, windowWidth, windowHeight)
     fontCamera.setToOrtho(false, windowWidth, windowHeight)
   }
 
