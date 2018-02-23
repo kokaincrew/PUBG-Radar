@@ -41,6 +41,7 @@ val boatColor = Color(1f, 0.49f, 0f, 0.9f)
 val planeColor = Color(0.93f, 0.90f, 0f, 1.0f)
 val parachuteColor = Color(0.94f, 1.0f, 1.0f, 1f)
 val playerColor = Color.RED!!
+val compaseColor = Color(0f, 0.95f, 1f, 1f)  //Turquoise1
 val normalItemColor = Color(0.87f, 0.0f, 1.0f, 1f)
 val rareScopeColor = Color(1.000f, 0.843f, 0.000f, 1.0f)         // Gold Triangle
 val rareArmorColor = Color(0.000f, 1.000f, 1.000f, 1.0f)            // LIGHT BLUE

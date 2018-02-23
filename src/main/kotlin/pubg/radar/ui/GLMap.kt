@@ -1,9 +1,6 @@
 package pubg.radar.ui
 
 import com.badlogic.gdx.*
-import com.badlogic.gdx.Input.Buttons.LEFT
-import com.badlogic.gdx.Input.Buttons.RIGHT
-import com.badlogic.gdx.Input.Buttons.MIDDLE
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.backends.lwjgl3.*
 import com.badlogic.gdx.graphics.*
@@ -15,6 +12,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.*
 import com.badlogic.gdx.math.*
+import com.badlogic.gdx.ApplicationListener
+import com.badlogic.gdx.Input.Buttons.*
 import pubg.radar.*
 import pubg.radar.deserializer.channel.ActorChannel.Companion.actors
 import pubg.radar.deserializer.channel.ActorChannel.Companion.airDropLocation
@@ -84,7 +83,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   }
 
   override fun onGameOver() {
-    camera.zoom = 1 / 4f
+    camera.zoom = 1 / 7f
     itemCamera.zoom
 
     aimStartTime.clear()
@@ -104,8 +103,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   lateinit var spriteBatch: SpriteBatch
   lateinit var shapeRenderer: ShapeRenderer
-  // lateinit var mapErangel: Texture
-  // lateinit var mapMiramar: Texture
   lateinit var mapErangelTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
   lateinit var mapMiramarTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
   lateinit var mapTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
@@ -115,8 +112,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   lateinit var alive: Texture
   lateinit var selficon: Texture
   lateinit var teamsalive: Texture
-
-  // lateinit var map: Texture
+  lateinit var largeFontShadow: BitmapFont
   lateinit var largeFont: BitmapFont
   lateinit var littleFont: BitmapFont
   lateinit var nameFont: BitmapFont
@@ -125,10 +121,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   lateinit var itemCamera: OrthographicCamera
   lateinit var camera: OrthographicCamera
   lateinit var alarmSound: Sound
+  lateinit var nameFontShadow: BitmapFont
+  lateinit var compaseFont: BitmapFont
+  lateinit var compaseFontShadow: BitmapFont
 
-  val tileZooms = listOf("256", "512", "1024", "2048", "4096"/*, "8192"*/)
+  val tileZooms = listOf("256", "512", "1024", "2048", "4096")
   val tileRowCounts = listOf(1, 2, 4, 8, 16/*, 32*/)
-  val tileSizes = listOf(819200f, 409600f, 204800f, 102400f, 51200f/*, 25600f*/)
+  val tileSizes = listOf(819200f, 409600f, 204800f, 102400f, 51200f)
 
   val layout = GlyphLayout()
   var windowWidth = initialWindowWidth
@@ -161,8 +160,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
     if (button == RIGHT) {
-    pinLocation.set(pinLocation.set(screenX.toFloat(), screenY.toFloat()).windowToMap())
-      camera.update()
+      pinLocation.set(pinLocation.set(screenX.toFloat(), screenY.toFloat()).windowToMap())
+      //  camera.update()
       println(pinLocation)
       return true
     } else if (button == LEFT) {
@@ -173,8 +172,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     } else if (button == MIDDLE) {
       screenOffsetX = 0f
       screenOffsetY = 0f
+
     }
     return false
+
   }
 
   override fun touchDragged (screenX: Int, screenY: Int, pointer: Int): Boolean {
@@ -203,7 +204,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     camera = OrthographicCamera(windowWidth, windowHeight)
     with(camera) {
       setToOrtho(true, windowWidth * windowToMapUnit, windowHeight * windowToMapUnit)
-      zoom = 1 / 4f
+      zoom = 1 / 7f
       update()
       position.set(mapWidth / 2, mapWidth / 2, 0f)
       update()
@@ -217,8 +218,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     teamsalive = Texture(Gdx.files.internal("images/teams.png"))
     selficon = Texture(Gdx.files.internal("images/self.png"))
     airdropimage = Texture(Gdx.files.internal("icons/airdrop.png"))
-    // mapErangel = Texture(Gdx.files.internal("Erangel.bmp"))
-    // mapMiramar = Texture(Gdx.files.internal("Miramar.bmp"))
     iconImages = mapOf(
       "AR.Supp" to Texture(Gdx.files.internal("icons/AR.Supp.png")),
       "S.Supp" to Texture(Gdx.files.internal("icons/S.Supp.png")),
@@ -277,7 +276,21 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         cur++
     }
     mapTiles = mapErangelTiles
-    // map = mapErangel
+
+    val generatorNumber = FreeTypeFontGenerator(Gdx.files.internal("NUMBER.TTF"))
+    val paramNumber = FreeTypeFontParameter()
+    paramNumber.characters = DEFAULT_CHARS
+    paramNumber.size = 24
+    paramNumber.color = WHITE
+    largeFont = generatorNumber.generateFont(paramNumber)
+    paramNumber.color = Color(0f, 0f, 0f, 0.5f)
+    largeFontShadow = generatorNumber.generateFont(paramNumber)
+
+    paramNumber.color = compaseColor
+    paramNumber.size = 14
+    compaseFont = generatorNumber.generateFont(paramNumber)
+    paramNumber.color = Color(0f, 0f, 0f, 0.5f)
+    compaseFontShadow = generatorNumber.generateFont(paramNumber)
 
     val generator = FreeTypeFontGenerator(Gdx.files.internal("GOTHICB.TTF"))
     val param = FreeTypeFontParameter()
@@ -294,6 +307,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     param.color = ORANGE
     param.size = 10
     itemFont = generator.generateFont(param)
+
+    param.color = Color(0.9f, 0.9f, 0.9f, 1f)
+    param.size = 11
+    nameFont = generator.generateFont(param)
+    param.color = Color(0f, 0f, 0f, 0.5f)
+    nameFontShadow = generator.generateFont(param)
     generator.dispose()
   }
 
@@ -318,7 +337,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     val cameraTileScale = Math.max(windowWidth, windowHeight) / camera.zoom
     var useScale = 0
     when {
-    // cameraTileScale > 4096 -> useScale = 5
       cameraTileScale > 2048 -> useScale = 4
       cameraTileScale > 1024 -> useScale = 3
       cameraTileScale > 512 -> useScale = 2
@@ -383,7 +401,30 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       littleFont.draw(spriteBatch, "$time", x, windowHeight - y)
       safeZoneHint()
       drawPlayerInfos(typeLocation[Player]) //PlayerName etc
+      for(i in -1..1) {
+        for(j in -1..1) {
+          compaseFontShadow.draw(spriteBatch, "0"  , windowWidth/2 + i, windowHeight/2 + 150 + j)        // N
+          compaseFontShadow.draw(spriteBatch, "45" , windowWidth/2 + 150 + i, windowHeight/2 + 150 + j)  // NE
+          compaseFontShadow.draw(spriteBatch, "90" , windowWidth/2 + 150 + i, windowHeight/2 + j)        // E
+          compaseFontShadow.draw(spriteBatch, "135", windowWidth/2 + 150 + i, windowHeight/2 - 150 + j)  // SE
+          compaseFontShadow.draw(spriteBatch, "180", windowWidth/2 + i, windowHeight/2 - 150 + j)        // S
+          compaseFontShadow.draw(spriteBatch, "225", windowWidth/2 - 150 + i, windowHeight/2 - 150+ j)   // SW
+          compaseFontShadow.draw(spriteBatch, "270", windowWidth/2 - 150 + i, windowHeight/2 + j)        // W
+          compaseFontShadow.draw(spriteBatch, "315", windowWidth/2 - 150 + i, windowHeight/2 + 150+ j)   // NW
+        }
+      }
+      compaseFont.draw(spriteBatch, "0"  , windowWidth/2, windowHeight/2 + 150)        // N
+      compaseFont.draw(spriteBatch, "45" , windowWidth/2 + 150, windowHeight/2 + 150)  // NE
+      compaseFont.draw(spriteBatch, "90" , windowWidth/2 + 150, windowHeight/2)        // E
+      compaseFont.draw(spriteBatch, "135", windowWidth/2 + 150, windowHeight/2 - 150)  // SE
+      compaseFont.draw(spriteBatch, "180", windowWidth/2, windowHeight/2 - 150)        // S
+      compaseFont.draw(spriteBatch, "225", windowWidth/2 - 150, windowHeight/2 - 150)  // SW
+      compaseFont.draw(spriteBatch, "270", windowWidth/2 - 150, windowHeight/2)        // W
+      compaseFont.draw(spriteBatch, "315", windowWidth/2 - 150, windowHeight/2 + 150)  // NW
     }
+
+
+
 
     paint(itemCamera.combined) {
       //Draw Airdrop Icon
@@ -415,7 +456,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         .forEach {
           val (x, y) = it.first
           val items = it.second
-          val finalColor = it.third
 
           val (sx, sy) = Vector2(x+16, y-16).mapToWindow()
           val syFix = windowHeight - sy
@@ -475,7 +515,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
       //draw self
       drawPlayer(LIME, tuple4(null, selfX, selfY, selfDir.angle()))
-      drawItem()
+      drawTeam()
+
       //drawAirDrop(zoom)
       drawAPawn(typeLocation, selfX, selfY, zoom, currentTime)
 
@@ -488,6 +529,17 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
     Gdx.gl.glDisable(GL20.GL_BLEND)
   }
+
+
+  private fun drawTeam() {
+
+        //println("actorWithPlayerState:" +actorWithPlayerState)
+        //println("player names" + playerNames)
+       // println(selfID)
+
+  }
+
+
 
   private fun drawAttackLine(currentTime: Long) {
     while (attacks.isNotEmpty()) {
@@ -616,10 +668,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
           drawPlayer(WHITE, it, false)
         }
         else -> {
-          //            actorInfos?.forEach {
-          //            bugln { "${it._1!!.archetype.pathName} ${it._1.location}" }
-          //            drawPlayer(BLACK, it)
-          //            }
         }
       }
     }
@@ -640,174 +688,6 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
   }
 
-  private fun ShapeRenderer.drawItem() {
-    droppedItemLocation.values.asSequence().filter { it.second.isNotEmpty() }
-        .forEach {
-          val (x, y) = it.first
-          val items = it.second
-          val finalColor = it.third
-
-          if (finalColor.a == 0f)
-            finalColor.set(
-                when {
-                  "m416" in items || "Ak" in items || "Scar" in items || "m16" in items || "DP" in items -> ARiflesColor
-                  "Mini" in items || "Sks" in items -> sniperColor
-                  "AR.Supp" in items || "S.Supp" in items -> suppressorColor
-                  "armor3" in items || "helmet3" in items -> rareArmorColor
-                  "4x" in items || "8x" in items -> rareScopeColor
-                  "AR.ExtQ" in items || "S.ExtQ" in items -> rareAttachColor
-                  "AR.Ext" in items || "S.Ext" in items || "AR.Comp" in items || "S.Comp" in items -> rareAttachColor
-                  "A.Grip" in items || "V.Grip" in items -> rareAttachColor
-                  "FirstAid" in items || "MedKit" in items -> healItemColor
-                  "98k" in  items -> k98Color
-                  "Ump" in items || "Pan" in items -> UmpandPanColor
-                  else -> normalItemColor
-                }
-              )
-/*
-Adding a bunch of different shapes/colors for certain backgroundRadius
-//legend
-
-largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
-                              "Light Blue Circle = Level 3 Helm/Chest\n " +
-                              "Orange Square = Mini/SKS\n"+
-                              "Brown Square = Kar98k\n"+
-                              "Pink Triange = Pan/UMP\n"+
-                              "White Triangle = AR/SR Suppressor\n"+
-                              "Gold Triangle = 4x/8x Scope",  10f, windowHeight - 50f)
-
-*/
-          val ARifles = when (finalColor) {
-          ARiflesColor -> false //m4/ak/scar/m16 LIME GREEN
-          else -> false
-          }
-
-          val lvl3Armor = when (finalColor) {
-          rareArmorColor -> false //lvl3armor LIGHT BLUE
-          else -> false
-          }
-
-          val SniperGuns = when (finalColor) {
-          sniperColor -> false // mini/sks ORANGERED
-          else -> false
-          }
-
-          val k98Gun = when (finalColor) {
-          k98Color -> true //kar98k
-          else -> false
-          }
-
-          val UmpandPan = when (finalColor) {
-            UmpandPanColor ->  false //ump and Pan
-            else -> false
-          }
-
-          val asSUP = when (finalColor) {
-            suppressorColor ->  false //AR and Sniper Suppressor
-            else -> false
-          }
-
-          val Scopes = when (finalColor) {
-            rareScopeColor ->  false //4x / 8x Scopes
-            else -> false
-          }
-
-          val backgroundRadius = (itemRadius + 50f)
-          val radius = itemRadius
-
-          val triBackRadius = backgroundRadius * 0.866f //1.5f
-          val triRadius = radius * 0.866f //1,5f
-
-          when {
-            ARifles -> {
-              // Lime Green Circle
-              color = finalColor
-              circle(x, y, backgroundRadius * 0.9f, 10)
-              color = finalColor
-              circle(x, y, radius * 0.9f, 10)
-            }
-
-            lvl3Armor -> {
-            //lvl3armor LIGHT BLUE Circle
-              color = finalColor
-              circle(x, y, backgroundRadius * 0.9f, 10)
-              color = finalColor
-              circle(x, y, radius * 0.9f, 10)
-            }
-
-            SniperGuns -> {
-              // mini/sks ORANGERED Square
-              color = finalColor
-              rect(x - backgroundRadius, y - backgroundRadius,
-                      backgroundRadius * 2, backgroundRadius * 2)
-              color = finalColor
-              rect(x - radius, y - radius, radius * 2, radius * 2)
-            }
-
-            k98Gun -> {
-              //kar98k Brown Square
-              color = RED
-              //finalColor
-
-              rect(x - backgroundRadius, y - backgroundRadius,
-                      backgroundRadius * 2, backgroundRadius * 2)
-              color = RED
-              //finalColor
-              rect(x - radius, y - radius, radius * 2, radius * 2)
-            }
-
-            UmpandPan -> {
-              //ump and Pan Pink Triangle
-              color = finalColor
-              triangle(x, y - triBackRadius,
-                      x - triBackRadius * 0.866f, y + triBackRadius * 0.5f,
-                      x + triBackRadius * 0.866f, y + triBackRadius * 0.5f)
-              color = finalColor
-              triangle(x, y - triRadius,
-                      x - triRadius * 0.866f, y + triRadius * 0.5f,
-                      x + triRadius * 0.866f, y + triRadius * 0.5f)
-            }
-
-            asSUP -> {
-              //AR and Sniper Suppressor White Triangle
-              color = finalColor
-              triangle(x, y - triBackRadius,
-                      x - triBackRadius * 0.866f, y + triBackRadius * 0.5f,
-                      x + triBackRadius * 0.866f, y + triBackRadius * 0.5f)
-
-              color = finalColor
-              triangle(x, y - triRadius,
-                      x - triRadius * 0.866f, y + triRadius * 0.5f,
-                      x + triRadius * 0.866f, y + triRadius * 0.5f)
-                    }
-
-                    Scopes -> {
-                    //  4x / 8x Scopes Gold Triangle
-                      color = finalColor
-                      triangle(x, y - triBackRadius,
-                              x - triBackRadius * 0.866f, y + triBackRadius * 0.5f,
-                              x + triBackRadius * 0.866f, y + triBackRadius * 0.5f)
-
-                      color = finalColor
-                      triangle(x, y - triRadius,
-                              x - triRadius * 0.866f, y + triRadius * 0.5f,
-                              x + triRadius * 0.866f, y + triRadius * 0.5f)
-                            }
-    /*          normal -> {
-              // Circle
-              color = BLACK
-              circle(x, y, backgroundRadius * 0.9f, 10)
-              color = BLACK
-              circle(x, y, radius * 0.9f, 10)
-            }
-*/
-            else -> {
-              // Do nothing
-            }
-          }
-        }
-  }
-
   fun drawPlayerInfos(players: MutableList<renderInfo>?) {
     players?.forEach {
       val (actor, x, y, _) = it
@@ -820,15 +700,21 @@ largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
       query(name)
       if (completedPlayerInfo.containsKey(name)) {
         val info = completedPlayerInfo[name]!!
-       val desc = "$name($numKills)\n${info.win}/${info.totalPlayed}\n${info.roundMostKill}-${info.killDeathRatio.d(2)}/${info.headshotKillRatio.d(2)}\n$teamNumber"
-       // nameFont.draw(spriteBatch, desc, sx + 2, windowHeight - sy - 2)
-      //} else nameFont.draw(spriteBatch, "$name($numKills)\n$teamNumber", sx + 2, windowHeight - sy - 2)
-      } else nameFont.draw(spriteBatch, "$name \n Kills: $numKills \n ID:($teamNumber)", sx + 2, windowHeight - sy - 2)
+        val desc = "($teamNumber)$name\n Kills: $numKills \n${info.killDeathRatio.d(2)} / ${info.headshotKillRatio.d(2)}"
+
+        for (i in -1..1)
+          for (j in -1..1)
+            nameFontShadow.draw(spriteBatch, desc, sx + 2 + i, windowHeight - sy - 6 + j)
+        nameFont.draw(spriteBatch, desc, sx + 2, windowHeight - sy - 6)
+      } else {
+        for (i in -1..1)
+          for (j in -1..1)
+            nameFontShadow.draw(spriteBatch, "($teamNumber)$name\n Kills: $numKills", sx + 2 + i, windowHeight - sy - 6 + j)
+        nameFont.draw(spriteBatch, "($teamNumber)$name \n Kills: $numKills", sx + 2, windowHeight - sy - 6)
+      }
     }
-    val profileText = "${completedPlayerInfo.size}/${completedPlayerInfo.size + pendingPlayerInfo.size}"
-    layout.setText(largeFont, profileText)
-   // largeFont.draw(spriteBatch, profileText, windowWidth - layout.width, windowHeight - 10f) // the right side text
   }
+
 
   var lastPlayTime = System.currentTimeMillis()
 
@@ -985,8 +871,9 @@ largeFont.draw(spriteBatch,   "Light Green Circle = m4/ak/scar/m16\n" +
     alive.dispose()
     teamsalive.dispose()
     selficon.dispose()
-    // mapErangel.dispose()
-    // mapMiramar.dispose()
+    nameFontShadow.dispose()
+    compaseFont.dispose()
+    compaseFontShadow.dispose()
     for ((key, image) in iconImages) {
       image.dispose()
     }

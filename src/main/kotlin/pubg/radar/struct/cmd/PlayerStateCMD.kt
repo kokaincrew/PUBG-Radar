@@ -157,7 +157,7 @@ object PlayerStateCMD : GameListener {
         38 -> {
           val TotalMovedDistanceMeter = propertyFloat()
           selfID = actor.netGUID//only self will get this update
-//          val NumKills = propertyInt()
+          //val NumKills = propertyInt()
 //          println("${playerNames[actor.netGUID]}${actor.netGUID} TotalMovedDistanceMeter=$TotalMovedDistanceMeter")
         }
         39 -> {
