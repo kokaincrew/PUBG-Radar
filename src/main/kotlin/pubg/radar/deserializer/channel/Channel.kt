@@ -47,7 +47,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
         }
         guidCache.isExportingNetGUIDBunch = true
         val NumGUIDsInBunch = bunch.readInt32()
-        val MAX_GUID_COUNT = 2048
+        val MAX_GUID_COUNT = 1228
 
         if (NumGUIDsInBunch > MAX_GUID_COUNT) {
             guidCache.isExportingNetGUIDBunch = false
@@ -145,8 +145,6 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
                 if (!bunch.bHasPackageMapExports && bunch.bitsLeft() > 0) {
                     check(bunch.bitsLeft() % 8 == 0)
 //        print("Received New partial bunch. Channel: ${InPartialBunch!!.ChIndex} ChSequence:${InPartialBunch!!.ChSequence} . NumBits Total: ${InPartialBunch!!.bitsLeft()}")
-                } else {
-//          print("Received New partial bunch. It only contained NetGUIDs")
                 }
             } else {
                 /* Merge in next partial bunch to InPartialBunch if:
@@ -175,7 +173,7 @@ abstract class Channel(val chIndex: Int, val chType: Int, val client: Boolean = 
                         inPartialBunch.ChSequence = bunch.ChSequence
 
                         if (bunch.bPartialFinal) {
-                            check(!bunch.bHasPackageMapExports) // Shouldn't have these, they only go in initial partial export bunches
+                            //check(!bunch.bHasPackageMapExports) // Shouldn't have these, they only go in initial partial export bunches
                             HandleBunch = inPartialBunch
 
                             inPartialBunch.bPartialFinal = true

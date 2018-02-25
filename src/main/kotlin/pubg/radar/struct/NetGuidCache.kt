@@ -81,7 +81,7 @@ class NetGUIDCache {
 
         // If we find this guid, make sure nothing changes
         if (existingCacheObjectPtr != null) {
-            bugln { "already register clien!! original=${actors[existingCacheObjectPtr.outerGUID]} --------------> new=$netGUID obj $obj" }
+            bugln { "already register client!! original=${actors[existingCacheObjectPtr.outerGUID]} --------------> new=$netGUID obj $obj" }
             val oldObj = existingCacheObjectPtr.holdObj
             if (oldObj != null && oldObj != obj)
                 bugln { "Reassigning NetGUID $netGUID" }

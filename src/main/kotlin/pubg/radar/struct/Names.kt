@@ -21,7 +21,7 @@ val Names = mutableMapOf(
         14 to "TextProperty",
         15 to "InterfaceProperty",
         16 to "MulticastDelegateProperty",
-//17 to "Available",
+        17 to "Available",
         18 to "LazyObjectProperty",
         19 to "SoftObjectProperty", // SoftClassProperty shares the same tag
         20 to "UInt64Property",
@@ -30,7 +30,7 @@ val Names = mutableMapOf(
         23 to "Int64Property",
         25 to "Int16Property",
         26 to "Int8Property",
-//27 to "Available",
+        27 to "Available",
         28 to "MapProperty",
         29 to "SetProperty",
 

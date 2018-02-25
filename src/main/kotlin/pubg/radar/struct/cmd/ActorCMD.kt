@@ -88,7 +88,13 @@ object ActorCMD : GameListener {
                     }
                     bugln { ",attachLocation $actor ----------> $locationOffset" }
                 }
-                9 -> propertyVector100()
+                9 -> {
+                    val locationOffset = propertyVector100()
+                    if (actor.Type == DroopedItemGroup) {
+                        bugln { "${actor.location} locationOffset $locationOffset" }
+                    }
+                    bugln { ",attachLocation $actor ----------> $locationOffset" }
+                }
                 10 -> propertyRotator()
                 11 -> {
                     val attachSocket = propertyName()

@@ -28,8 +28,8 @@ class Item {
                                                 "SniperRifle" to "S.Comp"
                                         ),
                                         "FlashHider" to mapOf(
-                                                "Large" to "FlashHider",
-                                                "SniperRifle" to "FlashHider"
+                                                "Large" to "FH",
+                                                "SniperRifle" to "FH"
                                         ),
                                         "Suppressor" to mapOf(
                                                 "Medium" to "U.Supp",
@@ -62,12 +62,15 @@ class Item {
                 ),
                 "Weapon" to mapOf(
                         "HK416" to "M4",
-                        "Kar98K" to "98k",
+                        "M416" to "M4",
+                        "Kar98k" to "98k",
+                        "Kar98" to "98k",
                         "SCAR-L" to "Scar",
                         "AK47" to "Ak",
                         "SKS" to "Sks",
                         "Grenade" to "Grenade",
                         "Mini14" to "Mini",
+                        "DP28" to "DP28",
                         "UMP" to "Ump",
                         "Vector" to "Vector",
                         "Pan" to "Pan"
