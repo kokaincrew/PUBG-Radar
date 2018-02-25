@@ -43,6 +43,7 @@ fun main(args: Array<String>) {
   if (args.size<2) {
     println("usage: <ip> <sniff option>")
     System.exit(-1)
+
   }
 
   Sniffer.sniffLocationOnline()
@@ -50,5 +51,11 @@ fun main(args: Array<String>) {
 
   val ui = GLMap()
   ui.show()
-
 }
+
+
+/*if (args[3] == "Offline") {
+
+    println("Loading PCAP File.")
+
+    Sniffer.sniffLocationOffline()*/

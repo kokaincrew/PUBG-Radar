@@ -28,10 +28,11 @@ Here is an easy way using [arpspoof](https://github.com/alandau/arpspoof/release
 # Windows (VMWare/MiddlePC)
 
 Follow the following instructions on your vmware or middle pc
+1. Enable IP Routing [Follow This Guide](http://keepthetech.com/2016/01/enable-ip-routing-on-windows10.html) *Note* This stops your connection from lagging out.
 1. run in Command Prompt 'arpsoof.exe <game_pc_ip>'
 2. Run in Command Prompt 'java -jar pubg-radar-1.0-SNAPSHOT-jar-with-dependencies.jar <middle_pc_ip> PortFilter <game_pc_ip>'
 
-**Note** Load the Pubg Radar in the Menu, Press your "Push to Talk" Keybind once ingame.
+**Note** Load the Pubg Radar in the Menu, Press your "Push to Talk" Keybind once ingame. 
 
 # Windows (Game PC Only)
 Run in Command Prompt 'java -jar pubg-radar-1.0-SNAPSHOT-jar-with-dependencies.jar <game_pc_ip> PortFilter ' 

@@ -84,7 +84,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   override fun onGameOver() {
     camera.zoom = 1 / 7f
-    itemCamera.zoom
+    //itemCamera.zoom
 
     aimStartTime.clear()
     attackLineStartTime.clear()
@@ -94,10 +94,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   fun show() {
     val config = Lwjgl3ApplicationConfiguration()
     config.setTitle("[${targetAddr.hostAddress} ${sniffOption.name}] - Radar")
-    config.useOpenGL3(true, 3, 3)
-    config.setWindowedMode(1000, 1000)
+    config.useOpenGL3(false, 3, 2)
+    config.setWindowedMode(800, 800)
     config.setResizable(true)
-    config.setBackBufferConfig(8, 8, 8, 8, 32, 0, 8)
+    config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 0)
     Lwjgl3Application(this, config)
   }
 
@@ -153,7 +153,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
   override fun scrolled(amount: Int): Boolean {
     camera.zoom *= 1.1f.pow(amount)
-    itemCamera.zoom *= 1.1f.pow(amount)
+    //itemCamera.zoom *= 1.1f.pow(amount)
     return true
   }
 
@@ -161,7 +161,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
   override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
     if (button == RIGHT) {
       pinLocation.set(pinLocation.set(screenX.toFloat(), screenY.toFloat()).windowToMap())
-      //  camera.update()
+      camera.update()
       println(pinLocation)
       return true
     } else if (button == LEFT) {
@@ -269,8 +269,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             mapMiramarTiles[it]?.set(y, mutableMapOf())
             for (j in 1..tileRowCounts[cur]) {
                 val x = if (j < 10) "0$j" else "$j"
-                mapErangelTiles[it]!![y]?.set(x, Texture(Gdx.files.internal("tiles/Erangel/${it}/${it}_${y}_${x}.png")))
-                mapMiramarTiles[it]!![y]?.set(x, Texture(Gdx.files.internal("tiles/Miramar/${it}/${it}_${y}_${x}.png")))
+               mapErangelTiles[it]!![y]?.set(x, Texture(Gdx.files.internal("tiles/Erangel/${it}/${it}_${y}_${x}-min.png")))
+               mapMiramarTiles[it]!![y]?.set(x, Texture(Gdx.files.internal("tiles/Miramar/${it}/${it}_${y}_${x}-min.png")))
             }
         }
         cur++
@@ -341,7 +341,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
       cameraTileScale > 1024 -> useScale = 3
       cameraTileScale > 512 -> useScale = 2
       cameraTileScale > 256 -> useScale = 1
-      else -> useScale = 0
+      else -> useScale = 1
     }
     val (tlX, tlY) = Vector2(0f, 0f).windowToMap()
     val (brX, brY) = Vector2(windowWidth, windowHeight).windowToMap()
@@ -369,7 +369,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     shapeRenderer.projectionMatrix = camera.combined
     Gdx.gl.glEnable(GL20.GL_BLEND)
 
-    drawGrid()
+   // drawGrid()
     drawCircles()
 
     val typeLocation = EnumMap<Archetype, MutableList<renderInfo>>(Archetype::class.java)
