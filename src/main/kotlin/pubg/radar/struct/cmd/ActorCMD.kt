@@ -1,13 +1,17 @@
 package pubg.radar.struct.cmd
 
-import pubg.radar.*
+import pubg.radar.GameListener
+import pubg.radar.bugln
 import pubg.radar.deserializer.ROLE_MAX
 import pubg.radar.deserializer.channel.ActorChannel.Companion.actors
 import pubg.radar.deserializer.channel.ActorChannel.Companion.airDropLocation
 import pubg.radar.deserializer.channel.ActorChannel.Companion.visualActors
-import pubg.radar.struct.*
+import pubg.radar.register
+import pubg.radar.struct.Actor
 import pubg.radar.struct.Archetype.*
+import pubg.radar.struct.Bunch
 import pubg.radar.struct.NetGUIDCache.Companion.guidCache
+import pubg.radar.struct.NetworkGUID
 import pubg.radar.struct.cmd.CMD.propertyBool
 import pubg.radar.struct.cmd.CMD.propertyName
 import pubg.radar.struct.cmd.CMD.propertyObject
@@ -17,93 +21,93 @@ import pubg.radar.struct.cmd.CMD.repMovement
 import java.util.concurrent.ConcurrentHashMap
 
 object ActorCMD : GameListener {
-  init {
-    register(this)
-  }
+    init {
+        register(this)
+    }
 
-  override fun onGameOver() {
-    actorWithPlayerState.clear()
-    playerStateToActor.clear()
-  }
+    override fun onGameOver() {
+        actorWithPlayerState.clear()
+        playerStateToActor.clear()
+    }
 
-  val actorWithPlayerState = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
-  val playerStateToActor = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
+    val actorWithPlayerState = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
+    val playerStateToActor = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
 
-  fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
-    with(bunch) {
-      when (waitingHandle) {
-        1 -> if (readBit()) { //bHidden
-          visualActors.remove(actor.netGUID)
-          bugln { ",bHidden id$actor" }
-        }
-        2 -> if (!readBit()) { // bReplicateMovement
-          if (!actor.isVehicle) {
-            visualActors.remove(actor.netGUID)
-          }
-          bugln { ",!bReplicateMovement id$actor " }
-        }
-        3 -> if (readBit()) { //bTearOff
-          visualActors.remove(actor.netGUID)
-          bugln { ",bTearOff id$actor" }
-        }
-        4 -> {
-          val role = readInt(ROLE_MAX)
-          val b = role
-        }
-        5 -> {
-          val (netGUID, obj) = readObject()
-          actor.owner = if (netGUID.isValid()) netGUID else null
-          bugln { " owner: [$netGUID] $obj ---------> beOwned:$actor" }
-        }
-        6 -> {
-          repMovement(actor)
-          with(actor) {
-            when (Type) {
-              AirDrop -> airDropLocation[netGUID] = location
-              Other -> {
-              }
-              else -> visualActors[netGUID] = this
-            }
-          }
-        }
-        7 -> {
-          val (a, obj) = readObject()
-          val attachTo = if (a.isValid()) {
-            actors[a]?.beAttached = true
-            a
-          } else null
-          if (actor.attachTo != null)
-            actors[actor.attachTo!!]?.beAttached = false
-          actor.attachTo = attachTo
-          bugln { ",attachTo [$actor---------> $a ${guidCache.getObjectFromNetGUID(a)} ${actors[a]}" }
-        }
-        8 -> {
-          val locationOffset = propertyVector100()
-          if (actor.Type == DroopedItemGroup) {
-            bugln { "${actor.location} locationOffset $locationOffset" }
-          }
-          bugln { ",attachLocation $actor ----------> $locationOffset" }
-        }
-        9 -> propertyVector100()
-        10 -> propertyRotator()
-        11 -> {
-          val attachSocket = propertyName()
-        }
-        12 -> {
-          val (attachComponnent, attachName) = bunch.readObject()
-        }
-        13 -> {
-          readInt(ROLE_MAX)
-        }
-        14 -> propertyBool()
-        15 -> propertyObject()
-        16 -> {
-          val (playerStateGUID, playerState) = propertyObject()
-          if (playerStateGUID.isValid()) {
-            actorWithPlayerState[actor.netGUID] = playerStateGUID
-            playerStateToActor[playerStateGUID] = actor.netGUID
-          }
-        }
+    fun process(actor: Actor, bunch: Bunch, waitingHandle: Int): Boolean {
+        with(bunch) {
+            when (waitingHandle) {
+                1 -> if (readBit()) { //bHidden
+                    visualActors.remove(actor.netGUID)
+                    bugln { ",bHidden id$actor" }
+                }
+                2 -> if (!readBit()) { // bReplicateMovement
+                    if (!actor.isVehicle) {
+                        visualActors.remove(actor.netGUID)
+                    }
+                    bugln { ",!bReplicateMovement id$actor " }
+                }
+                3 -> if (readBit()) { //bTearOff
+                    visualActors.remove(actor.netGUID)
+                    bugln { ",bTearOff id$actor" }
+                }
+                4 -> {
+                    val role = readInt(ROLE_MAX)
+                    val b = role
+                }
+                5 -> {
+                    val (netGUID, obj) = readObject()
+                    actor.owner = if (netGUID.isValid()) netGUID else null
+                    bugln { " owner: [$netGUID] $obj ---------> beOwned:$actor" }
+                }
+                6 -> {
+                    repMovement(actor)
+                    with(actor) {
+                        when (Type) {
+                            AirDrop -> airDropLocation[netGUID] = location
+                            Other -> {
+                            }
+                            else -> visualActors[netGUID] = this
+                        }
+                    }
+                }
+                7 -> {
+                    val (a, obj) = readObject()
+                    val attachTo = if (a.isValid()) {
+                        actors[a]?.beAttached = true
+                        a
+                    } else null
+                    if (actor.attachTo != null)
+                        actors[actor.attachTo!!]?.beAttached = false
+                    actor.attachTo = attachTo
+                    bugln { ",attachTo [$actor---------> $a ${guidCache.getObjectFromNetGUID(a)} ${actors[a]}" }
+                }
+                8 -> {
+                    val locationOffset = propertyVector100()
+                    if (actor.Type == DroopedItemGroup) {
+                        bugln { "${actor.location} locationOffset $locationOffset" }
+                    }
+                    bugln { ",attachLocation $actor ----------> $locationOffset" }
+                }
+                9 -> propertyVector100()
+                10 -> propertyRotator()
+                11 -> {
+                    val attachSocket = propertyName()
+                }
+                12 -> {
+                    val (attachComponnent, attachName) = bunch.readObject()
+                }
+                13 -> {
+                    readInt(ROLE_MAX)
+                }
+                14 -> propertyBool()
+                15 -> propertyObject()
+                16 -> {
+                    val (playerStateGUID, playerState) = propertyObject()
+                    if (playerStateGUID.isValid()) {
+                        actorWithPlayerState[actor.netGUID] = playerStateGUID
+                        playerStateToActor[playerStateGUID] = actor.netGUID
+                    }
+                }
 //        17 -> {//RemoteViewPitch 2
 //          readUInt16()
 //        }
@@ -275,9 +279,9 @@ object ActorCMD : GameListener {
 //          println("GroggyHealthMax=$GroggyHealthMax")
 //        }
 //        80 -> propertyBool()
-        else -> return false
-      }
-      return true
+                else -> return false
+            }
+            return true
+        }
     }
-  }
 }
