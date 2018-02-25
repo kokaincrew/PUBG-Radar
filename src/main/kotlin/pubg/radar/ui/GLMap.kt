@@ -109,7 +109,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         config.useOpenGL3(false, 3, 2)
         config.setWindowedMode(800, 800)
         config.setResizable(true)
-        config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 2)
+        config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 8)
         Lwjgl3Application(this, config)
     }
 
@@ -401,8 +401,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     .forEach {
                         val (x, y) = it.first
                         val items = it.second
-                        val yOffset = 2
-                        val (sx, sy) = Vector2(x, y + yOffset).mapToWindow()
+                        val (sx, sy) = Vector2(x+16, y-16).mapToWindow()
+
                         val syFix = windowHeight - sy
 
 
@@ -430,7 +430,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             corpseLocation.values.forEach {
                 //droppedItemLocation
                 val (x,y) = it
-                val (sx,sy) = Vector2(x,y).mapToWindow()
+                val (sx, sy) = Vector2(x+16, y-16).mapToWindow()
                 val syFix = windowHeight - sy
                 val iconScale = 2f / camera.zoom
 
