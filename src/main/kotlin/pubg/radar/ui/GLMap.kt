@@ -156,13 +156,13 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private var filterAttach = 1
     private var filterLvl2 = -1
     private var filterScope = -1
-    private var filterHeals = -1
+    private var filterMeds = -1
     private var filterAmmo = -1
     private var scopesToFilter = arrayListOf("")
     private var weaponsToFilter = arrayListOf("")
     private var attachToFilter = arrayListOf("")
     private var level2Filter = arrayListOf("")
-    private var healsToFilter = arrayListOf("")
+    private var medsToFilter = arrayListOf("")
     private var ammoToFilter = arrayListOf("")
     private var dragging = false
     private var prevScreenX = -1f
@@ -236,7 +236,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             NUMPAD_2 -> filterAttach = filterAttach * -1
             NUMPAD_3 -> filterLvl2 = filterLvl2 * -1
             NUMPAD_4 -> filterScope = filterScope * -1
-            NUMPAD_5 -> filterHeals = filterHeals * -1
+            NUMPAD_5 -> filterMeds = filterMeds * -1
             NUMPAD_6 -> filterAmmo = filterAmmo * -1
             NUMPAD_7 -> camera.zoom = 1 / 8f
             NUMPAD_8 -> camera.zoom = 1 / 12f
@@ -487,10 +487,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             else
                 espFontShadow.draw(spriteBatch, "SCOPE", 98f, windowHeight - 42f)
 
-            if (filterHeals != 1)
-                espFont.draw(spriteBatch, "HEALS", 150f, windowHeight - 25f)
+            if (filterMeds != 1)
+                espFont.draw(spriteBatch, "MEDS", 150f, windowHeight - 25f)
             else
-                espFontShadow.draw(spriteBatch, "HEALS", 150f, windowHeight - 25f)
+                espFontShadow.draw(spriteBatch, "MEDS", 150f, windowHeight - 25f)
 
             if (filterAmmo != 1)
                 espFont.draw(spriteBatch, "AMMO", 150f, windowHeight - 42f)
@@ -498,9 +498,9 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 espFontShadow.draw(spriteBatch, "AMMO", 150f, windowHeight - 42f)
 
             if (drawcompass == 1)
-                    espFont.draw(spriteBatch, "Compass", 200f, windowHeight - 42f)
+                    espFont.draw(spriteBatch, "COMPASS", 200f, windowHeight - 42f)
             else
-                    espFontShadow.draw(spriteBatch, "Compass", 200f, windowHeight - 42f)
+                    espFontShadow.draw(spriteBatch, "COMPASS", 200f, windowHeight - 42f)
 
 
             val time = (pinLocation.cpy().sub(selfX, selfY).len() / runSpeed).toInt()
@@ -531,7 +531,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             arrayListOf("M16","M4", "98k", "Scar", "Ak", "Sks", "Grenade", "Mini", "DP28", "Ump", "Vector", "Pan")
         }
 
-        healsToFilter = if (filterHeals != 1) {
+        medsToFilter = if (filterMeds != 1) {
             arrayListOf("")
         } else {
             arrayListOf("Bandage", "FirstAid", "MedKit", "Drink", "Pain", "Syringe")
@@ -573,7 +573,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
                                                          if (it !in ammoToFilter) {
 
-                                                             if (it !in healsToFilter) {
+                                                             if (it !in medsToFilter) {
 
                                                              if (
                                                                      iconScale > 20 &&
