@@ -115,6 +115,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var mapErangelTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
     private lateinit var mapMiramarTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
     private lateinit var mapTiles: MutableMap<String, MutableMap<String, MutableMap<String, Texture>>>
+    private lateinit var drawVehicleImage: Texture
     private lateinit var iconImages: Icons
     private lateinit var corpseboximage: Texture
     private lateinit var airdropimage: Texture
@@ -244,6 +245,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         }
         itemCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
         fontCamera = OrthographicCamera(initialWindowWidth, initialWindowWidth)
+        drawVehicleImage = Texture(Gdx.files.internal("images/vehicle.png"))
         alarmSound = Gdx.audio.newSound(Gdx.files.internal("sounds/Alarm.wav"))
         hubpanel = Texture(Gdx.files.internal("images/hub_panel.png"))
         hubpanelblank = Texture(Gdx.files.internal("images/hub_panel_blank.png"))
@@ -657,9 +659,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 }
                 TwoSeatCar -> actorInfos?.forEach {
                     drawVehicle(carColor, it, vehicle2Width, vehicle6Width)
+                   // drawVehicleImage(drawVehicleImage, it, vehicle2Width, vehicle6Width) doesnt work just trying new stuff
                 }
                 ThreeSeatCar -> actorInfos?.forEach {
-                    drawVehicle(carColor, it, vehicle2Width, vehicle6Width)
+                   drawVehicle(carColor, it, vehicle2Width, vehicle6Width)
                 }
                 FourSeatCar -> actorInfos?.forEach {
                     drawVehicle(carColor, it, vehicle4Width, vehicle6Width)
@@ -806,6 +809,16 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         }
         return false
     }
+    private fun drawVehicleImage(texture: Texture, actorInfo: renderInfo,
+                                          width: Float, height: Float) {
+        val (actor, x, y, dir) = actorInfo
+        val vx = actor!!.velocity.x
+        val vy = actor.velocity.y
+
+        val dirVector = dirUnitVector.cpy().rotate(dir).scl(height / 2)
+        val backVector = dirVector.cpy().nor().scl(height / 2 + 200f)
+
+    }
 
     private fun ShapeRenderer.drawVehicle(_color: Color, actorInfo: renderInfo,
                                           width: Float, height: Float) {
@@ -851,6 +864,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         littleFont.dispose()
         corpseboximage.dispose()
         airdropimage.dispose()
+        drawVehicleImage.dispose()
         iconImages.iconSheet.dispose()
         compaseFont.dispose()
         compaseFontShadow.dispose()
