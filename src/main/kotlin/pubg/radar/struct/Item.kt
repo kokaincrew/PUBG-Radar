@@ -24,8 +24,8 @@ class Item {
                                 "Muzzle" to mapOf(
                                         "Choke" to "Choke",
                                         "Compensator" to mapOf(
-                                                "Large" to "AR.Comp",
-                                                "SniperRifle" to "S.Comp"
+                                                "Large" to "AR.Comp"
+                                                //"SniperRifle" to "S.Comp"
                                         ),
                                         "FlashHider" to mapOf(
                                                 "Large" to "FH",
@@ -45,8 +45,9 @@ class Item {
                                         )
                                 ),
                                 "Upper" to mapOf(
-                                        "DotSight" to "R.Dot",
+                                        "DotSight" to "red-dot",
                                         "Aimpoint" to "2x",
+                                        "Holosight" to "holo",
                                         "ACOG" to "4x",
                                         "CQBSS" to "8x"
                                 )
@@ -113,7 +114,7 @@ class Item {
                 var c = category
                 for (word in words) {
                     if (word !in c) return null
-                    val sub = c[word]
+                    val sub: Any? = c[word]
                     if (sub is String) return sub
                     c = sub as Map<String, Any>
                 }

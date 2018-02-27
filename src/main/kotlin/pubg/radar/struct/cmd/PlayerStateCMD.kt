@@ -2,7 +2,7 @@ package pubg.radar.struct.cmd
 
 import pubg.radar.GameListener
 import pubg.radar.deserializer.ROLE_MAX
-import pubg.radar.http.PlayerProfile.Companion.query
+import pubg.radar.util.PlayerProfile.Companion.query
 import pubg.radar.register
 import pubg.radar.struct.Actor
 import pubg.radar.struct.Bunch
