@@ -11,16 +11,16 @@ Using [maven](https://maven.apache.org/)
 # Key Binds
 
 **Item Filter:**
-*NUMPAD_1 -> Filter Weapon
-*NUMPAD_2 -> Filter Attachments
-*NUMPAD_3 -> Filter Level 2
-*NUMPAD_4 -> Filter Scopes
-*NUMPAD_5 -> filter Meds
+* NUMPAD_1 -> Filter Weapon
+* NUMPAD_2 -> Filter Attachments
+* NUMPAD_3 -> Filter Level 2
+* NUMPAD_4 -> Filter Scopes
+* NUMPAD_5 -> filter Meds
 
 **Zooms:**
-*NUMPAD_7 -> Scouting
-*NUMPAD_8 -> Scout/Loot
-*NUMPAD_9 -> Looting
+* NUMPAD_7 -> Scouting
+* NUMPAD_8 -> Scout/Loot
+* NUMPAD_9 -> Looting
 
 # Linux
 Execute the following commands on the vmware or middle pc:
