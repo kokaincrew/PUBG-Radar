@@ -16,6 +16,7 @@ Using [maven](https://maven.apache.org/)
 * NUMPAD_3 -> Filter Level 2
 * NUMPAD_4 -> Filter Scopes
 * NUMPAD_5 -> filter Meds
+* NUMPAD_6 -> filter Ammo
 
 **Zooms:**
 * NUMPAD_7 -> Scouting
