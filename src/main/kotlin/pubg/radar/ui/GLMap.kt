@@ -147,7 +147,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private val aimStartTime = HashMap<NetworkGUID, Long>()
     private val attackLineStartTime = LinkedList<Triple<NetworkGUID, NetworkGUID, Long>>()
     private val pinLocation = Vector2()
-    private var drawcompass = 0
+    private var drawcompass = -1
     private var filterWeapon = 1
     private var filterAttach = -1
     private var filterLvl2 = -1
@@ -206,7 +206,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             NUMPAD_7 -> camera.zoom = 1 / 8f
             NUMPAD_8 -> camera.zoom = 1 / 12f
             NUMPAD_9 -> camera.zoom = 1 / 24f
-            NUMPAD_0 -> drawcompass = 1
+            NUMPAD_0 -> drawcompass = drawcompass * -1
         }
         return false
     }
@@ -384,7 +384,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
         paint(fontCamera.combined) {
             //Compass
-            if (drawcompass == 1) {
+            if (drawcompass > 0) {
                 for (i in -1..1) {
                     for (j in -1..1) {
                         compaseFontShadow.draw(spriteBatch, "0", windowWidth / 2 + i, windowHeight / 2 + 150 + j)        // N
@@ -430,6 +430,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
             // ITEM ESP FILTER PANEL
             spriteBatch.draw(hubpanelblank, 30f, windowHeight - 60f)
+            spriteBatch.draw(hubpanelblank, 130f, windowHeight - 60f)
 
             if (filterWeapon == 1)
                 espFont.draw(spriteBatch, "WEAPON", 37f, windowHeight - 25f)
@@ -450,6 +451,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 espFont.draw(spriteBatch, "SCOPE", 92f, windowHeight - 42f)
             else
                 espFontShadow.draw(spriteBatch, "SCOPE", 92f, windowHeight - 42f)
+
+            if (drawcompass == 1)
+                espFont.draw(spriteBatch, "Compass", 138f, windowHeight - 42f)
+            else
+                espFontShadow.draw(spriteBatch, "Compass", 138f, windowHeight - 42f)
 
             val time = (pinLocation.cpy().sub(selfX, selfY).len() / runSpeed).toInt()
             val (x, y) = pinLocation.mapToWindow()
