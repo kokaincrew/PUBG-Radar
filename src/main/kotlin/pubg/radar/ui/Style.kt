@@ -39,4 +39,3 @@ val attackLineColor = Color(1.0f, 0f, 0f, 1f)
 val pinColor = Color(1f, 1f, 0f, 1f)
 val redZoneColor = Color(1f, 0f, 0f, 0.2f)
 val safeZoneColor = Color(1f, 1f, 1f, 0.5f)
-

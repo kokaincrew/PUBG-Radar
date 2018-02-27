@@ -8,6 +8,7 @@ class Icons(sheet: Texture, size: Int) {
     var icon: TextureRegion
     private var iconSize: Int = size
     private val coordinates: Map<String, Array<Int>> = mapOf(
+            // These Match up to the sprite sheet
             // 0 Items
             "Gas" to arrayOf(1, 0),
             "Bandage" to arrayOf(2, 0),
@@ -24,11 +25,11 @@ class Icons(sheet: Texture, size: Int) {
             "Helm2" to arrayOf(4, 1),
             "Helm3" to arrayOf(5, 1),
             // 2 Melee
-            // "Crowbar" to arrayOf(0, 2),
-            // "Sickle" to arrayOf(1, 2),
-            // "Machete" to arrayOf(2, 2),
+            "Crowbar" to arrayOf(0, 2),
+            "Sickle" to arrayOf(1, 2),
+            "Machete" to arrayOf(2, 2),
             "Pan" to arrayOf(3, 2),
-            // 3 Ammo
+            // 5 Ammo
             "9" to arrayOf(1, 3),
             "45" to arrayOf(2, 3),
             "556" to arrayOf(3, 3),
@@ -40,7 +41,10 @@ class Icons(sheet: Texture, size: Int) {
             "Molotov" to arrayOf(2, 4),
             "Grenade" to arrayOf(3, 4),
             // 5 Shotguns
+            "S686" to arrayOf(0, 5),
             "SK12" to arrayOf(1, 5),
+            "S1897" to arrayOf(2, 5),
+            "Sawed-off" to arrayOf(3, 5),
             // 6 Pistols
             "R45" to arrayOf(4, 6),
             // 7 MGs
@@ -66,24 +70,28 @@ class Icons(sheet: Texture, size: Int) {
             "98k" to arrayOf(5, 9),
             "M24" to arrayOf(6, 9),
             "Awm" to arrayOf(7, 9),
-            // 10 - 12 Attachments
+            // Grips
             "V.Grip" to arrayOf(0, 10),
             "U.Ext" to arrayOf(1, 10),
             "AR.Ext" to arrayOf(2, 10),
             "S.Ext" to arrayOf(3, 10),
+            // Compensator
             "U.Comp" to arrayOf(4, 10),
             "AR.Comp" to arrayOf(5, 10),
             "S.Comp" to arrayOf(6, 10),
             "AR.Stock" to arrayOf(7, 10),
             "CheekPad" to arrayOf(8, 10),
+            // Extended Mags
             "A.Grip" to arrayOf(0, 11),
             "U.ExtQ" to arrayOf(1, 11),
             "AR.ExtQ" to arrayOf(2, 11),
             "S.ExtQ" to arrayOf(3, 11),
+            // Suppressors
             "U.Supp" to arrayOf(4, 11),
             "AR.Supp" to arrayOf(5, 11),
             "S.Supp" to arrayOf(6, 11),
             "H.Supp" to arrayOf(7, 11),
+            // Scopes
             "R.Dot" to arrayOf(0, 12),
             "Holo" to arrayOf(1, 12),
             "2x" to arrayOf(2, 12),
